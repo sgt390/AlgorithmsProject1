@@ -20,8 +20,8 @@ for entry in os.scandir(directory):
 
 algorithms = {
     'Prim': prim,
-    'Kruscal naive': kruskal,
-    'Kruskal opt': kruskal_opt
+    'Kruskal opt': kruskal_opt,
+    'Kruscal naive': kruskal
 }
 
 

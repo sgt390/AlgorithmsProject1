@@ -133,8 +133,6 @@ class EdgeInfo:
 def is_path(G: Graph, s, t):
     nodeinfo = np.repeat(None, len(G.vertex_map))
     edgeinfo = {}
-    for index, edge in G.edges.items():
-        edgeinfo[index] = None
     # edgeinfo = np.repeat(None, len(G.edges))
     for v in G.vertex_map:
         nodeinfo[v] = NodeInfo(v)
