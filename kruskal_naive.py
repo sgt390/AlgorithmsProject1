@@ -4,12 +4,12 @@ from copy import deepcopy
 
 
 def kruskal(G: Graph):
-    mst = Graph()
+    mst = Graph((), G.num_vertex)
     for v in G.vertex_map:  # O(n)
         mst.add_vertex(v)
     edges = order_edges(G)  # O(n*log(n))
     for u, v, w in edges:  # O(m)
-        if not mst.is_path(u, v):
+        if not mst.is_path(u, v):  # O(n+m)
             mst.add_edge(u, v, w)
         if mst.num_edges == mst.num_vertex - 1:
             break

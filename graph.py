@@ -1,10 +1,11 @@
 import numpy as np
-
+from collections import OrderedDict
 
 class Vertex:
     def __init__(self, name):
         self.id = name
         self.adjacent = {}
+        self.visited = 0
 
     def add_neighbor(self, v, weight):
         #if v in self.adjacent and self.adjacent[v] < weight:
@@ -21,6 +22,7 @@ class Edge:
         self.u = u
         self.v = v
         self.weight = weight
+        self.label = None
 
     def flatten(self):
         return self.u, self.v, self.weight
@@ -33,12 +35,12 @@ def next_edge_id(u, v):
 
 class Graph:
 
-    def __init__(self, matrix=()):
+    def __init__(self, matrix=(), num_v=0):
         self.num_vertex = 0
         self.num_edges = 0
-        self.vertex_map: dict = {}
-        self.edges = {}
-        self.incident_edges = {}
+        self.vertex_map = OrderedDict()
+        self.edges = OrderedDict()
+        self.incident_edges = np.repeat({}, num_v)
         for (v, u, weight) in matrix:
             self.add_edge(v, u, weight)
 
@@ -87,7 +89,7 @@ def load_file_matrix(path):
         for row in f.readlines():
             v, u, w = map(int, row.rstrip('\n').split(' '))
             graph.append([v-1, u-1, w])
-    return Graph(graph), int(num_vertex)
+    return Graph(graph, num_vertex), int(num_vertex)
 
 
 def load_files(paths):
@@ -97,7 +99,7 @@ def load_files(paths):
 
 
 def tree_to_graph(t, G):  # O(|t|)
-    mst = Graph()
+    mst = Graph((), G.num_vertex)
     for i, adj in enumerate(t):
         mst.add_vertex(i)
         if adj is not None:
@@ -106,38 +108,33 @@ def tree_to_graph(t, G):  # O(|t|)
     return mst
 
 
-def dfs(G: Graph, v, nodeinfo, edgeinfo):
-    nodeinfo[v].visited = 1
+def dfs(G: Graph, v):
+    G.vertex_map[v].visited = 1
     for e in G.incident_edges[v]:
-        if not edgeinfo[e].label:
+        if not G.edges[e].label:
             w = G.opposite(e, v)
-            if nodeinfo[w].visited == 0:
-                edgeinfo[e].label = 'discovery_edge'
-                dfs(G, w, nodeinfo, edgeinfo)
+            if G.vertex_map[w].visited == 0:
+                G.edges[e].label = 'discovery_edge'
+                dfs(G, w)
             else:
-                edgeinfo[e].label = 'back_edge'
+                G.edges[e].label = 'back_edge'
 
 
-class NodeInfo:
-    def __init__(self, id_):
-        self.id = id_
-        self.visited = 0
-
-
-class EdgeInfo:
-    def __init__(self, id_):
-        self.id = id_
-        self.label = None
+def dfs_clear(G: Graph, v):
+    G.vertex_map[v].visited = 0
+    for e in G.incident_edges[v]:
+        if G.edges[e].label:
+            w = G.opposite(e, v)
+            if G.vertex_map[w].visited == 1:
+                G.edges[e].label = None
+                dfs_clear(G, w)
+            else:
+                G.edges[e].label = None
 
 
 def is_path(G: Graph, s, t):
-    nodeinfo = np.repeat(None, len(G.vertex_map))
-    edgeinfo = {}
-    # edgeinfo = np.repeat(None, len(G.edges))
-    for v in G.vertex_map:
-        nodeinfo[v] = NodeInfo(v)
-    for _, e in G.edges.items():
-        edgeinfo[e.id] = EdgeInfo(e.id)
-    dfs(G, s, nodeinfo, edgeinfo)
-    return nodeinfo[t].visited
+    dfs(G, s)
+    cycle = G.vertex_map[t].visited
+    dfs_clear(G, s)
+    return cycle
 

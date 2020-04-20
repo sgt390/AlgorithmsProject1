@@ -7,7 +7,7 @@ from unionfind import UnionFind
 
 def kruskal_opt(G: Graph):
     G = deepcopy(G)
-    mst = Graph()
+    mst = Graph((), G.num_vertex)
     uf = UnionFind()
     for v in G.vertex_map:  # O(n)
         mst.add_vertex(v)

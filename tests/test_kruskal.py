@@ -11,7 +11,7 @@ class TestKruskal(TestCase):
             (1, 2, 30),
             (2, 3, 10),
             (2, 0, 50)
-        ))
+        ), 4)
         oracle = [[0., 1., 0., 0.],
                   [1., 0., 1., 0.],
                   [0., 1., 0., 1.],
@@ -25,7 +25,7 @@ class TestKruskal(TestCase):
             (1, 2, 30),
             (2, 3, 10),
             (2, 0, 50)
-        ))
+        ), 4)
         mst = kruskal(G0)
         w = mst.total_weight()
         assert 42 == w

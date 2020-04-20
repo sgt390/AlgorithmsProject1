@@ -19,8 +19,8 @@ for entry in os.scandir(directory):
 
 
 algorithms = {
-    'Prim': prim,
-    'Kruskal opt': kruskal_opt,
+    #'Prim': prim,
+    #'Kruskal opt': kruskal_opt,
     'Kruscal naive': kruskal
 }
 
