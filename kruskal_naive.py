@@ -1,12 +1,12 @@
 import numpy as np
-from graph import Graph, dfs
-from copy import deepcopy
+from graph import Graph
 
 
 def kruskal(G: Graph):
     mst = Graph((), G.num_vertex)
     for v in G.vertex_map:  # O(n)
-        mst.add_vertex(v)
+        if v is not None:
+            mst.add_vertex(v.id)
     edges = order_edges(G)  # O(n*log(n))
     for u, v, w in edges:  # O(m)
         if not mst.is_path(u, v):  # O(n+m)
@@ -16,7 +16,7 @@ def kruskal(G: Graph):
     return mst
 
 
-def order_edges(G): # O(m*log(m))
+def order_edges(G):  # O(m*log(m))
     edges = G.get_edges()
     dtype = [('u', int), ('v', int), ('weight', int)]
     edges = np.array(list(edges), dtype)

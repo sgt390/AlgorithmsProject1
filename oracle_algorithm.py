@@ -4,10 +4,10 @@ from prim import prim
 from graph import load_files
 from kruskal_naive import kruskal
 
-input = 'graphs/input_random_05_20.txt'
+_input = 'graphs/input_random_05_20.txt'
 
 edges = []
-with open(input) as f:
+with open(_input) as f:
     f.readline()
     for x in f.readlines():
         v, u, w = x.rstrip('\n').split(' ')
@@ -22,11 +22,11 @@ for v, u in T.edges:
     w = T.adj[v][u]['weight']
     wnetworkx += w
 
-for path, G, num_vertex in load_files([input]):
+for path, G, num_vertex in load_files([_input]):
     mst = prim(G, 0)
 wprim = mst.total_weight()
 
-for path, G, num_vertex in load_files([input]):
+for path, G, num_vertex in load_files([_input]):
     mst = kruskal(G)
 wkruskal = mst.total_weight()
 

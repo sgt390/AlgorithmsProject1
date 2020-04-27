@@ -1,47 +1,43 @@
 # load inputs and compute things:
 # weight and remove duplicates
-input = './test_inputs/input_random_32_800.txt'
-#input = './test_inputs/input_random_1_10.txt'
+_input = './test_inputs/input_random_32_800.txt'
 
 
-def duplicates(lines):
+def duplicates(_lines):
     copies = []
     adj = {}
-    for line in lines:
+    for line in _lines:
         line = line.rstrip('\n')
         u, v, w = line.split(' ')
         u, v, w = int(u), int(v), int(w)
-        if not u in adj:
+        if u not in adj:
             adj[u] = {}
         if v in adj[u]:
             copies.append([u, v])
         else:
             adj[u][v] = w
-        if not v in adj:
+        if v not in adj:
             adj[v] = {}
         if u not in adj[v]:
             adj[v][u] = w
     return copies
 
 
-def selfloops(lines):
-    loops = []
-    for i, line in enumerate(lines):
+def selfloops(_lines):
+    _loops = []
+    for i, line in enumerate(_lines):
         u, v, w = line.strip('\n').split(' ')
         u, v, w = int(u), int(v), int(w)
         if u == v:
-            loops.append(i+2)
-    return loops
+            _loops.append(i + 2)
+    return _loops
 
 
-with open(input) as f:
+with open(_input) as f:
     f.readline()
     lines = f.readlines()
     dup = duplicates(lines)
     loops = selfloops(lines)
 
-
 print(f"copies:{dup}")
 print(f"selfloops:{loops}")
-
-

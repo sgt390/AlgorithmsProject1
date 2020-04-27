@@ -40,9 +40,10 @@ def graph_to_min_heap(G, s):  # O(n)
     a = []
     node_id = list(range(G.num_vertex))
     for i, k in enumerate(G.vertex_map):  # O(n)
-        v = G.vertex_map[k].id
-        a.append((v, np.inf))
-        node_id[v] = i
+        if k is not None:
+            v = k.id
+            a.append((v, np.inf))
+            node_id[v] = i
     a[node_id[s]] = (a[node_id[0]][0], s)
     build_min_heap(a, node_id)  # O(n) (a contains n elements)
     return a, node_id

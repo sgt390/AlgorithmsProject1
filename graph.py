@@ -1,5 +1,5 @@
 import numpy as np
-from collections import OrderedDict
+
 
 class Vertex:
     def __init__(self, name):
@@ -8,7 +8,7 @@ class Vertex:
         self.visited = 0
 
     def add_neighbor(self, v, weight):
-        #if v in self.adjacent and self.adjacent[v] < weight:
+        # if v in self.adjacent and self.adjacent[v] < weight:
         #    weight = self.adjacent[v]
         self.adjacent[v] = weight
 
@@ -22,13 +22,12 @@ class Edge:
         self.u = u
         self.v = v
         self.weight = weight
-        self.label = None
 
     def flatten(self):
         return self.u, self.v, self.weight
 
 
-def next_edge_id(u, v):
+def edge_id(u, v):
     u, v = sorted([v, u])
     return int(0.5 * (u + v) * (u + v + 1) + v)
 
@@ -38,21 +37,20 @@ class Graph:
     def __init__(self, matrix=(), num_v=0):
         self.num_vertex = 0
         self.num_edges = 0
-        self.vertex_map = OrderedDict()
-        self.edges = OrderedDict()
+        self.vertex_map = np.repeat(None, num_v)
+        self.is_vertex = np.repeat(False, num_v)
+        self.edges = {}
         self.incident_edges = np.repeat({}, num_v)
         for (v, u, weight) in matrix:
             self.add_edge(v, u, weight)
 
     def add_vertex(self, node):
-        if node not in self.vertex_map:
+        if not self.is_vertex[node]:
+            self.is_vertex[node] = True
             self.num_vertex += 1
             self.vertex_map[node] = Vertex(node)
             self.incident_edges[node] = set()
-
-    def opposite(self, e_id, node):
-        e = self.edges[e_id]
-        return e.v if node == e.u else e.u
+        return self.vertex_map[node]
 
     def add_edge(self, v, u, weight):
         self.num_edges += 1
@@ -60,16 +58,17 @@ class Graph:
         self.add_vertex(u)
         self.vertex_map[v].add_neighbor(u, weight)
         self.vertex_map[u].add_neighbor(v, weight)
-        e_id = next_edge_id(u, v)
-        self.edges[e_id] = Edge(e_id, u, v, weight)
-        self.incident_edges[v].add(e_id)
-        self.incident_edges[u].add(e_id)
+        e_id = edge_id(u, v)
+        edge = Edge(e_id, u, v, weight)
+        self.edges[e_id] = edge
+        self.incident_edges[v].add(edge)
+        self.incident_edges[u].add(edge)
 
     def adjacency_matrix(self):
         adj = np.zeros((self.num_vertex, self.num_vertex))
         for v in self.vertex_map:
-            for u in self.vertex_map[v].adjacent:
-                adj[v, u] += 1
+            for u in v.adjacent:
+                adj[v.id, u] += 1
         return adj
 
     def get_edges(self):  # O(m)
@@ -88,7 +87,7 @@ def load_file_matrix(path):
         num_vertex, _ = f.readline().split(' ')
         for row in f.readlines():
             v, u, w = map(int, row.rstrip('\n').split(' '))
-            graph.append([v-1, u-1, w])
+            graph.append([v - 1, u - 1, w])
     return Graph(graph, num_vertex), int(num_vertex)
 
 
@@ -108,33 +107,17 @@ def tree_to_graph(t, G):  # O(|t|)
     return mst
 
 
-def dfs(G: Graph, v):
-    G.vertex_map[v].visited = 1
-    for e in G.incident_edges[v]:
-        if not G.edges[e].label:
-            w = G.opposite(e, v)
-            if G.vertex_map[w].visited == 0:
-                G.edges[e].label = 'discovery_edge'
-                dfs(G, w)
-            else:
-                G.edges[e].label = 'back_edge'
-
-
-def dfs_clear(G: Graph, v):
-    G.vertex_map[v].visited = 0
-    for e in G.incident_edges[v]:
-        if G.edges[e].label:
-            w = G.opposite(e, v)
-            if G.vertex_map[w].visited == 1:
-                G.edges[e].label = None
-                dfs_clear(G, w)
-            else:
-                G.edges[e].label = None
+def dfs(G, v: Vertex, visited):
+    visited[v.id] = True
+    for u in v.adjacent:
+        if not visited[u]:
+            visited = dfs(G, G.vertex_map[u], visited)
+    return visited
 
 
 def is_path(G: Graph, s, t):
-    dfs(G, s)
-    cycle = G.vertex_map[t].visited
-    dfs_clear(G, s)
-    return cycle
+    visited = [False] * G.num_vertex
+    sv = G.vertex_map[s]
+    visited = dfs(G, sv, visited)
 
+    return visited[t]
