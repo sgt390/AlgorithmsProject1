@@ -43,16 +43,17 @@ def execute_mst(mst_algorithm):
 def mean_time(vs, ts):
     x_bar = []
     y_bar = []
-    for vertex, _time in zip(vs, ts):
+    for vertex in vs:
         if vertex not in x_bar:
-            y_bar.append(np.mean(sum((v for v in vs if v == vertex))))
+            y_bar.append(np.mean([t for v, t in zip(vs, ts) if v == vertex]))
             x_bar.append(vertex)
+    y_bar = [y for _, y in sorted(zip(x_bar, y_bar))]
+    x_bar = sorted(x_bar)
     return x_bar, y_bar
 
 
-def plot_times(results, algorithm, pos):
-    nodes, times = results
-    plt.subplot(310 + pos)
+def plot_times(data, algorithm):
+    nodes, times = mean_time(data[0], data[1])
     plt.xlabel('# Nodes')
     plt.ylabel('Time')
     plt.plot(nodes, times, label=algorithm)

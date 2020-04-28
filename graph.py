@@ -4,7 +4,7 @@ import numpy as np
 class Vertex:
     def __init__(self, name):
         self.id = name
-        self.adjacent = {}
+        self.adjacent = {} # typed.Dict.empty(types.int64, types.int64)
         self.visited = 0
 
     def add_neighbor(self, v, weight):
@@ -33,7 +33,6 @@ def edge_id(u, v):
 
 
 class Graph:
-
     def __init__(self, matrix=(), num_v=0):
         self.num_vertex = 0
         self.num_edges = 0
@@ -41,6 +40,7 @@ class Graph:
         self.is_vertex = np.repeat(False, num_v)
         self.edges = {}
         self.incident_edges = np.repeat({}, num_v)
+        self.neighbors = [[] for _ in range(int(num_v))]
         for (v, u, weight) in matrix:
             self.add_edge(v, u, weight)
 
@@ -63,6 +63,8 @@ class Graph:
         self.edges[e_id] = edge
         self.incident_edges[v].add(edge)
         self.incident_edges[u].add(edge)
+        self.neighbors[v].append(u)
+        self.neighbors[u].append(v)
 
     def adjacency_matrix(self):
         adj = np.zeros((self.num_vertex, self.num_vertex))
@@ -107,17 +109,17 @@ def tree_to_graph(t, G):  # O(|t|)
     return mst
 
 
-def dfs(G, v: Vertex, visited):
-    visited[v.id] = True
-    for u in v.adjacent:
+def dfs(vs, v, visited, t):
+    if t == v:
+        return True
+    visited[v] = 1
+    for u in vs[v]:
         if not visited[u]:
-            visited = dfs(G, G.vertex_map[u], visited)
-    return visited
+            if dfs(vs, u, visited, t):
+                return True
+    return False
 
 
 def is_path(G: Graph, s, t):
-    visited = [False] * G.num_vertex
-    sv = G.vertex_map[s]
-    visited = dfs(G, sv, visited)
-
-    return visited[t]
+    visited = np.repeat(0, G.num_vertex)
+    return dfs(G.neighbors, s, visited, t)

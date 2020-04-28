@@ -1,0 +1,2 @@
+del *.pyd
+del *.c
