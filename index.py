@@ -57,11 +57,12 @@ def plot_times(data, algorithm):
     plt.xlabel('# Nodes')
     plt.ylabel('Time')
     plt.plot(nodes, times, label=algorithm)
+    plt.show()
 
 
 for i, alg in enumerate(algorithms):
     result, table = execute_mst(algorithms[alg])
     print(f'Algorithm: {alg}')
     pprint(table)
-    plot_times(result, alg, i + 1)
-plt.show()
+    plot_times(result, alg)
+
